@@ -26,11 +26,15 @@ app.post('/identify', async (req: Request, res: Response) => {
 
     //  Creates new Primary when no match found
     if (matches.length === 0) {
-        const newContact = await prisma.contact.create({
-            data: { email, phoneNumber: phoneStr, linkPrecedence: "primary" }
-        });
-        return res.status(200).json(formatResponse(newContact, []));
-    }
+    const newContact = await prisma.contact.create({
+        data: { 
+            email: email, 
+            phoneNumber: phoneStr, 
+            linkPrecedence: "primary" 
+        }
+    });
+    return res.status(200).json(formatResponse(newContact, []));
+}
 
     //  Finds all related contacts in the cluster when a match found
     const allPrimaryIds = new Set(matches.map(m => m.linkedId || m.id));
@@ -70,17 +74,22 @@ app.post('/identify', async (req: Request, res: Response) => {
     res.status(200).json(formatResponse(primaryContact, cluster));
 });
 
-function formatResponse(primary: any, all: any[]) {
-    const emails = Array.from(new Set([primary.email, ...all.map(c => c.email)])).filter(Boolean);
-    const phones = Array.from(new Set([primary.phoneNumber, ...all.map(c => c.phoneNumber)])).filter(Boolean);
-    const secondaryIds = all.filter(c => c.id !== primary.id).map(c => c.id);
+function formatResponse(primary: any, cluster: any[]) {
+    
+    const allContacts = [primary, ...cluster];
+    const emails = Array.from(new Set(allContacts.map(c => c.email))).filter(Boolean);
+    const phoneNumbers = Array.from(new Set(allContacts.map(c => c.phoneNumber))).filter(Boolean);
+
+    const secondaryContactIds = cluster
+        .filter(c => c.id !== primary.id)
+        .map(c => c.id);
 
     return {
         contact: {
             primaryContactId: primary.id,
             emails,
-            phoneNumbers: phones,
-            secondaryContactIds: secondaryIds
+            phoneNumbers,
+            secondaryContactIds
         }
     };
 }
