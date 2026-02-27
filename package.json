@@ -15,12 +15,14 @@
   "description": "Bitespeed Identity Reconciliation Service",
   "dependencies": {
     "@prisma/client": "^6.0.0",
+    "cors": "^2.8.6",
     "express": "^5.0.0",
     "prisma": "^6.0.0",
-    "typescript": "^5.0.0",
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.0",
     "@types/node": "^20.0.0"
   }
