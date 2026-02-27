@@ -3,8 +3,10 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const app = express();
-app.use(express.static('public'));
+
 app.use(express.json());
+app.use(express.static('public'));
+
 
 app.post('/identify', async (req: Request, res: Response) => {
     const { email, phoneNumber } = req.body;
