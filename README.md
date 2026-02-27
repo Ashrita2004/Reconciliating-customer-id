@@ -12,6 +12,9 @@ A backend service designed to unify fragmented customer data. This system ensure
 - **Database:** SQLite
 - **Deployment:** Render.com
 
+The service is deployed and active at:
+**[https://reconciliating-customer-id.onrender.com](https://reconciliating-customer-id.onrender.com)**
+
 ### Sample Request Payload (JSON)
 ```json
 {
