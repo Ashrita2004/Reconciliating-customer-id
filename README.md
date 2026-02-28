@@ -21,7 +21,7 @@ When a request is received at the `/identify` endpoint:
 1. **Identity Lookup:** Search for contacts matching the given `email` or `phoneNumber`.
 2. **State Evaluation:**
    - **No Match:** Create a new **Primary** contact.
-   - **Single/Multiple Match:** Fetch the entire "cluster" of linked contacts.
+   - **Match found:** Fetch the entire cluster of linked contacts.
 3. **Reconciliation Rules:**
    - **Oldest Wins:** The contact with the earliest `createdAt` timestamp is designated as the **Primary**.
    - **Primary-to-Secondary Conversion:** If a request links two previously independent Primary contacts, the newer one is demoted to **Secondary** and linked to the older one.
