@@ -24,7 +24,7 @@ When a request is received at the `/identify` endpoint:
    - **Match found:** Fetch the entire cluster of linked contacts.
 3. **Reconciliation Rules:**
    - **Oldest Wins:** The contact with the earliest `createdAt` timestamp is designated as the **Primary**.
-   - **Primary-to-Secondary Conversion:** If a request links two previously independent Primary contacts, the newer one is demoted to **Secondary** and linked to the older one.
+   - **Primary to Secondary Conversion:** If a request links two previously independent Primary contacts, the newer one is demoted to **Secondary** and linked to the older one.
    - **New Attribute:** If the request introduces a new email or phone number that didn't exist in the cluster, a new **Secondary** contact is created.
 4. **Response Aggregation:** Consolidate all unique emails, phone numbers, and secondary IDs into a unified JSON structure.
 
