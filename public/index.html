@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary: #6366f1;
-            --primary-hover: #4f46e5;
+            --primary-hover: #231f81;
             --bg: #0f172a;
             --card-bg: #1e293b;
             --text: #f8fafc;
@@ -112,6 +112,26 @@
             border-bottom-color: transparent; border-radius: 50%;
             animation: rotation 1s linear infinite; margin-right: 10px;
         }
+        .history-btn {
+            background: transparent; border: 1px solid var(--primary); color: var(--primary);
+            padding: 6px 12px; font-size: 0.8rem; width: auto; cursor: pointer; border-radius: 6px;
+        }
+        .history-btn:hover { background: var(--primary); color: white; }
+
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: var(--card-bg); width: 90%; max-width: 850px; max-height: 80vh;
+            border-radius: 16px; border: 1px solid var(--border); padding: 2rem;
+            overflow-y: auto; position: relative;
+        }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.85rem; }
+        .history-table th { color: var(--text-muted); text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+        .history-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; color: var(--text-muted); }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 900px) {
@@ -154,13 +174,28 @@
         </div>
 
         <div class="card">
-            <h2><i class="fas fa-address-card"></i> Visual Insights</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 style="margin:0;"><i class="fas fa-address-card"></i> Visual Insights</h2>
+                <button class="history-btn" onclick="fetchHistory()">
+                    <i class="fas fa-history"></i> View Logs
+                </button>
+            </div>
             <div id="visualContent" class="card-content">
                 <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
                     <i class="fas fa-id-badge" style="font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.3;"></i>
                     <p>Resolution details will appear here after search.</p>
                 </div>
             </div>
+        </div>
+    </div>
+    <div id="historyModal" class="modal-overlay" onclick="closeHistory()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <i class="fas fa-times close-modal" onclick="closeHistory()"></i>
+            <div style="display:flex; justify-content: space-between; align-items:center;">
+                <h2 style="color: var(--primary); margin:0;"><i class="fas fa-database"></i> Audit Logs</h2>
+                <button onclick="clearLogs()" style="width: auto; background: #ef4444; font-size: 0.7rem; padding: 6px 12px;">Clear Database</button>
+            </div>
+            <div id="historyList" style="margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -228,10 +263,49 @@
                 loader.style.display = "none";
             }
         }
-
+        
         function copyToClipboard() {
             navigator.clipboard.writeText(document.getElementById('output').textContent);
             alert("JSON data copied to clipboard!");
+        }
+        async function fetchHistory() {
+            document.getElementById('historyModal').style.display = 'flex';
+            const list = document.getElementById('historyList');
+            list.innerHTML = `<p style="text-align:center; color:var(--text-muted);">Fetching cluster history...</p>`;
+
+            try {
+                const response = await fetch('/history');
+                const logs = await response.json();
+
+                list.innerHTML = `
+                    <table class="history-table">
+                        <thead>
+                            <tr><th>ID</th><th>Email</th><th>Phone</th><th>Precedence</th><th>LinkedID</th></tr>
+                        </thead>
+                        <tbody>
+                            ${logs.map(log => `
+                                <tr>
+                                    <td>#${log.id}</td>
+                                    <td>${log.email || '-'}</td>
+                                    <td>${log.phoneNumber || '-'}</td>
+                                    <td><span class="tag" style="border-color:${log.linkPrecedence === 'primary' ? 'var(--accent)' : 'var(--text-muted)'}; color:${log.linkPrecedence === 'primary' ? 'var(--accent)' : 'var(--text-muted)'}">${log.linkPrecedence}</span></td>
+                                    <td>${log.linkedId ? '#' + log.linkedId : '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                list.innerHTML = `<p style="color:#ef4444;">Error loading database logs.</p>`;
+            }
+        }
+
+        function closeHistory() { document.getElementById('historyModal').style.display = 'none'; }
+
+        async function clearLogs() {
+            if(!confirm("Are you sure? This will wipe the identity database.")) return;
+            await fetch('/history/clear', { method: 'DELETE' });
+            fetchHistory(); // Refresh table
         }
     </script>
 </body>

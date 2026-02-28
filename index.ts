@@ -96,6 +96,28 @@ function formatResponse(primary: any, cluster: any[]) {
 
 const PORT = process.env.PORT || 3000;
 
+app.get('/history', async (_req: Request, res: Response) => {
+    try {
+        const contacts = await prisma.contact.findMany({
+            orderBy: { 
+                createdAt: 'desc' 
+            }
+        });
+        res.status(200).json(contacts);
+    } catch (error) {
+        console.error("History Fetch Error:", error);
+        res.status(500).json({ error: "Failed to retrieve audit logs" });
+    }
+});
+
+app.delete('/history/clear', async (_req: Request, res: Response) => {
+    try {
+        await prisma.contact.deleteMany({});
+        res.status(200).json({ message: "Database cleared successfully" });
+    } catch (error) {
+        res.status(500).json({ error: "Cleanup failed" });
+    }
+});
 app.listen(PORT, () => {
     console.log(`FluxCart Identity Engine active on port ${PORT}`);
 });
